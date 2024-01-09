@@ -1,20 +1,11 @@
-FROM php:7-apache
+FROM php:8-apache
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN savedAptMark="$(apt-mark showmanual)" && \
-    apt-get install -y --no-install-recommends libgmp-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    docker-php-ext-configure gmp && \
-    docker-php-ext-install gmp mysqli pdo_mysql bcmath && \
-    apt-mark auto '.*' > /dev/null && \
-    apt-mark manual $savedAptMark && \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false && \
-    apt-get clean
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions gmp pdo_mysql mysqli
 
 COPY docker-entrypoint.sh /docker/docker-entrypoint.sh
-COPY sourcebans.ini /usr/local/etc/php/conf.d/sourcebans.ini
 
 RUN chmod +x /docker/docker-entrypoint.sh
 
